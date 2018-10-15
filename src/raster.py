@@ -10,7 +10,7 @@ import json
 import numpy as np
 import shapely.geometry
 
-def read_multipolygon(geojson_path, buffer_size=0.01):
+def read_multipolygon(geojson_path, buffer_size=1e-5):
     """
     Reads a geojson and converts the result into a Multipolygon
     """
@@ -44,6 +44,7 @@ def raster_coords(coords, img_size, bbox):
     for j in [0, 1]:
         coords[:, j] -= bbox["lr"][j]
         coords[:, j] *= (img_size[j] + 1) / (bbox["ul"][j] - bbox["lr"][j])
+        coords[:, j] = img_size[j] - coords[:, j]
 
     return np.round(coords).astype(np.int32)
 
