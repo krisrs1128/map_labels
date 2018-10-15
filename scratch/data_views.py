@@ -27,20 +27,11 @@ plt.imshow(im[:, :, 7])
 
 # let's see the associated deepglobe mask
 label_path = raw_dir + subdir + "geojson/spacenetroads/spacenetroads_AOI_5_Khartoum_img194.geojson"
-poly = read_multipolygon(label_path, buffer_size=1e-5)
+poly = read_multipolygon(label_path)
 poly = shapely.ops.cascaded_union(poly)
 
 # get coordinates
-gdal_obj = gdal.Open(im_path)
-ulx, xres, xskew, uly, yskew, yres  = gdal_obj.GetGeoTransform()
-lrx = ulx + (gdal_obj.RasterXSize * xres)
-lry = uly + (gdal_obj.RasterYSize * yres)
-
-bbox = {
-    "max": [lrx, lry],
-    "min": [ulx, uly]
-}
-
+bbox = im_bounds(im_path)
 img_size = im.shape[:-1]
 contours = multipoly_contours(poly, img_size, bbox)
 y = make_mask(contours, img_size)
@@ -52,3 +43,16 @@ plt.imshow(y, alpha=0.2)
 plt.show()
 
 # can we now get some analogous labelings from OpenStreetMap?
+query_skeleton = "[output:json];({});(._;>;); out;"
+bb_string = "{},{},{},{}".format(bbox["lr"][1], bbox["ul"][0], bbox["ul"][1], bbox["lr"][0])
+road_query = "way['highway']({});".format(bb_string)
+write_geojson_(query_skeleton.format(road_query), "osm_roads")
+poly = read_multipolygon("osm_roads.geojson")
+
+img_size = im.shape[:-1]
+contours = multipoly_contours(poly, img_size, bbox)
+y = make_mask(contours, img_size)
+
+plt.imshow(im[:, :, 4], alpha=0.9)
+plt.imshow(y, alpha=0.2)
+plt.show()
