@@ -10,6 +10,7 @@ import json
 import numpy as np
 import shapely.geometry
 
+
 def read_multipolygon(geojson_path, buffer_size=1e-5):
     """
     Reads a geojson and converts the result into a Multipolygon
@@ -21,6 +22,10 @@ def read_multipolygon(geojson_path, buffer_size=1e-5):
         if geom.geom_type != "Polygon":
             geom = geom.buffer(buffer_size)
         geoms.append(geom)
+
+    poly = shapely.ops.cascaded_union(
+        shapely.geometry.MultiPolygon(geoms)
+    )
 
     return shapely.geometry.MultiPolygon(geoms)
 
