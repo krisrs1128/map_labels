@@ -18,7 +18,7 @@ raw_dir = "/Users/krissankaran/Desktop/map_labels/data/raw/"
 
 # an example raw image
 subdir = "AOI_5_Khartoum_Roads_Sample/"
-im_path = raw_dir + subdir + "MUL-PanSharpen/MUL-PanSharpen_AOI_5_Khartoum_img194.tif"
+im_path = raw_dir + subdir + "MUL-PanSharpen/MUL-PanSharpen_AOI_5_Khartoum_img304.tif"
 im = tifffile.imread(im_path)
 plt.imshow(im[:, :, 0])
 plt.imshow(im[:, :, 1])
@@ -26,9 +26,8 @@ plt.imshow(im[:, :, 4])
 plt.imshow(im[:, :, 7])
 
 # let's see the associated deepglobe mask
-label_path = raw_dir + subdir + "geojson/spacenetroads/spacenetroads_AOI_5_Khartoum_img194.geojson"
+label_path = raw_dir + subdir + "geojson/spacenetroads/spacenetroads_AOI_5_Khartoum_img304.geojson"
 poly = read_multipolygon(label_path)
-poly = shapely.ops.cascaded_union(poly)
 
 # get coordinates
 bbox = im_bounds(im_path)
@@ -38,7 +37,7 @@ y = make_mask(contours, img_size)
 
 plt.ioff()
 plt.close()
-plt.imshow(im[:, :, 4], alpha=0.9)
+plt.imshow(im[:, :, 7], alpha=0.9)
 plt.imshow(y, alpha=0.2)
 plt.show()
 
@@ -55,4 +54,23 @@ y = make_mask(contours, img_size)
 
 plt.imshow(im[:, :, 4], alpha=0.9)
 plt.imshow(y, alpha=0.2)
+plt.show()
+
+# what if we dropped some random number of polygons
+subpoly = drop_polygons(poly)
+
+img_size = im.shape[:-1]
+contours = multipoly_contours(subpoly, img_size, bbox)
+y = make_mask(contours, img_size)
+
+plt.imshow(im[:, :, 4], alpha=0.9)
+plt.imshow(y, alpha=0.2)
+plt.show()
+
+# now try coarsening the labels
+indices = coarsened_labels(y, [100, 100])
+coarsened_y = coarsened_image(y.shape, indices)
+
+plt.imshow(im[:, :, 4], alpha=0.9)
+plt.imshow(coarsened_y, alpha=0.2)
 plt.show()
