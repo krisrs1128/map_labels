@@ -47,8 +47,6 @@ bb_string = "{},{},{},{}".format(bbox["lr"][1], bbox["ul"][0], bbox["ul"][1], bb
 road_query = "way['highway']({});".format(bb_string)
 write_geojson_(query_skeleton.format(road_query), "osm_roads")
 poly = read_multipolygon("osm_roads.geojson")
-
-img_size = im.shape[:-1]
 contours = multipoly_contours(poly, img_size, bbox)
 y = make_mask(contours, img_size)
 
@@ -58,8 +56,6 @@ plt.show()
 
 # what if we dropped some random number of polygons
 subpoly = drop_polygons(poly)
-
-img_size = im.shape[:-1]
 contours = multipoly_contours(subpoly, img_size, bbox)
 y = make_mask(contours, img_size)
 
@@ -69,8 +65,17 @@ plt.show()
 
 # now try coarsening the labels
 indices = coarsened_labels(y, [100, 100])
-coarsened_y = coarsened_image(y.shape, indices)
+y = coarsened_image(y.shape, indices)
 
 plt.imshow(im[:, :, 4], alpha=0.9)
-plt.imshow(coarsened_y, alpha=0.2)
+plt.imshow(y, alpha=0.2)
+plt.show()
+
+# alternatively, try extracting just the centers of each polygon
+subpoly = polygon_centers(poly)
+contours = multipoly_contours(subpoly, img_size, bbox)
+y = make_mask(contours, img_size)
+
+plt.imshow(im[:, :, 4], alpha=0.9)
+plt.imshow(y, alpha=0.2)
 plt.show()

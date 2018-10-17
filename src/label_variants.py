@@ -5,6 +5,9 @@ Some variations for labeling images
 """
 
 def drop_polygons(polys, p=0.5):
+    """
+    Randomly drop a fraction of polygons from a multipoly
+    """
     subpolys = []
     for i in range(len(polys)):
         if np.random.random() < p:
@@ -13,7 +16,21 @@ def drop_polygons(polys, p=0.5):
     return shapely.geometry.MultiPolygon(subpolys)
 
 
+def polygon_centers(polys, buffer=1e-5):
+    """
+    Replace a polygon with a small circle at its center
+    """
+    subpolys = []
+    for i in range(len(polys)):
+        subpolys.append(polys[i].centroid.buffer(buffer))
+
+    return shapely.geometry.MultiPolygon(subpolys)
+
+
 def coarsened_labels(mask, stride):
+    """
+    Return coarse boxes where mask had some positive labels
+    """
     indices = []
 
     m, n = mask.shape
